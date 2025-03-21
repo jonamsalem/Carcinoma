@@ -1,0 +1,198 @@
+---
+title: "data_processing"
+output: html_document
+date: "2025-03-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(Seurat)
+library(dplyr) 
+library(patchwork)
+library(Matrix)
+library(data.table)  # For fast reading of large files
+library(ggplot2)
+library(Cairo)
+```
+
+```{r}
+data <- fread("./data/GSM4285803_scRNA_RawCounts.csv", data.table = FALSE)
+
+# Set rownames correctly
+rownames(data) <- data[[1]]  #get the row names
+data <- data[,-1]  # Remove gene names column
+
+# Convert to matrix and then sparse matrix to save data
+expr_matrix <- as.matrix(data)
+expr_sparse <- Matrix(expr_matrix, sparse = TRUE) 
+
+
+expr_sparse <- t(expr_sparse)
+
+# Create Seurat object
+seu.object.carc <- CreateSeuratObject(counts = expr_sparse, min.cells = 3, min.features = 200,project = 'carcinoma')
+
+```
+
+## QC
+
+```{r, dev='cairo_pdf'}
+#library size distribution plot (nCount_RNA) shows the total number of UMIs (or transcript molecules) detected per cell.
+#potentially some doublets
+
+pCounts <- VlnPlot(seu.object.carc, features = "nCount_RNA", pt.size = 0.1) + 
+  theme(legend.position = "none")
+
+pGenes <- VlnPlot(seu.object.carc, features = "nFeature_RNA", pt.size = 0.1) +
+  theme(legend.position = 'none')
+
+seu.object.carc[["mt.percent"]] <- PercentageFeatureSet(seu.object.carc, pattern = "^MT-")
+
+pMT <- VlnPlot(seu.object.carc, features = 'mt.percent', pt.size = 0.1) +
+  theme(legend.position = 'none')
+
+
+pCounts | pGenes | pMT
+
+```
+```{r}
+mean_mt <- mean(seu.object.carc$mt.percent)
+median_mt <- median(seu.object.carc$mt.percent)
+
+mean_rna <- mean(seu.object.carc$nCount_RNA)
+median_rna <- median(seu.object.carc$nCount_RNA)
+
+mean_gene <- mean(seu.object.carc$nFeature_RNA)
+median_gene <- median(seu.object.carc$nFeature_RNA)
+```
+
+```{r, dev='cairo_pdf'}
+
+create_boxplot <- function(data, col_name) {
+  boxplot(data, col = 'blue', main = paste("BoxPlot of", col_name))
+}
+
+# Create the boxplots with dynamic titles using the column names
+create_boxplot(seu.object.carc$mt.percent, "mt.percent")
+create_boxplot(seu.object.carc$nCount_RNA, "nCount_RNA")
+create_boxplot(seu.object.carc$nFeature_RNA, "nFeature_RNA")
+
+```
+```{r, dev='cairo_pdf'}
+FeatureScatter(seu.object.carc, feature1 = 'nCount_RNA', feature2 = 'mt.percent')
+
+FeatureScatter(seu.object.carc, feature1 = 'nCount_RNA', feature2 = 'nFeature_RNA')
+
+```
+We see a strong correlation between the features and counts (sum of umis and non zero cells)
+mt.percent shows no relationship with counts(# of umis)
+
+
+```{r}
+
+filtered_seu <- subset(seu.object.carc, 
+                          subset = nFeature_RNA > 2000 &               # Cells expressing more than 2000 genes
+                            nCount_RNA > 8000 & nCount_RNA < 80000 &  # UMIs between 8000 and 10000
+                            mt.percent < 15)                          # Mitochondrial gene percentage less than 15%
+dim(filtered_seu)
+```
+
+## Normalization, Feature Selection, and Scaling
+
+```{r dev='cairo_pdf'}
+# Normalize data
+filtered_seu_norm <- NormalizeData(filtered_seu, normalization.method = 'LogNormalize', scale.factor = 1e4) #default is 10,000
+
+# After normalization, values are stored in the "data" slot, not "counts"
+norm_data <- GetAssayData(filtered_seu_norm, slot = "data")
+counts_vector <- norm_data@x
+
+par(mfrow=c(1,2))
+# Raw counts (log10 transformed for visualization)
+raw_counts <- GetAssayData(filtered_seu, slot = "counts")
+raw_counts_vector <- raw_counts@x
+hist(log10(raw_counts_vector), 
+     breaks = 100,
+     main = "Raw Counts (log10)",
+     xlab = "log10(UMI Count)")
+
+# Normalized data (already log-transformed)
+hist(counts_vector, 
+     breaks = 100,
+     main = "LogNormalized Values",
+     xlab = "ln(CP10K+1)")
+
+
+```
+```{r dev='cairo_pdf'}
+
+filtered_seu_norm <- FindVariableFeatures(filtered_seu_norm, selection.method = 'vst', nfeatures = 3000) #vst uses a regression to get correlate mean expression value correlation to cv2 to choose the featur es
+
+top10 <- head(VariableFeatures(filtered_seu_norm), 10)
+ 
+feature_plot <- VariableFeaturePlot(filtered_seu_norm)
+LabelPoints(feature_plot, points =  top10, repel = TRUE)
+```
+
+```{r}
+filtered_seu_norm <- ScaleData(filtered_seu_norm, vars.to.regress = 'mt.percent') #by default only scales the varaible genes
+#already got  rid of cells with high mt rna, but we can still ignore mt rna in scaling
+```
+## Dimensionality Reduction and Clustering
+```{r}
+filtered_seu_norm <- RunPCA(object = filtered_seu_norm)
+```
+```{r}
+print(filtered_seu_norm[['pca']], dims = 1:5, nfeatures =5)
+ 
+# 5 most variable features per PC
+```
+```{r, dev = 'cairo_pdf'}
+VizDimLoadings(filtered_seu_norm, dims = 1:2, reduction='pca')
+
+#shows the new value for the genes. before it was a normalized, scaled expression, now its a value for pc.
+```
+
+```{r, dev= 'cairo_pdf'}
+DimPlot(object = filtered_seu_norm, reduction = 'pca')
+
+```
+
+
+```{r, dev='cairo_pdf', fig.height=10, fig.width=5}
+DimHeatmap(filtered_seu_norm, dims = 1:10, cells = 500, balanced = TRUE)
+#yellow - high pc value or +
+# purple - low pc value or -
+# clearly cluster genes based on pc's
+# genes that contribute most to PC1 and PC2 to a random subset of 500 cells.
+# Balanced to ensuregenes are taken from both ends of the loading spectrum.
+# We can see that as we look at more and more PC's the clear differences starts to go away
+
+```
+
+```{r, dev='cairo_pdf'}
+ElbowPlot(filtered_seu_norm, reduction = 'pca') #around 15 
+#Elbow plots show you the standard deviation compared to PC. 
+```
+```{r}
+filtered_seu_norm <- FindNeighbors(filtered_seu_norm, dims = 1:15)
+filtered_seu_norm <- FindClusters(filtered_seu_norm, resolution = 0.4) #resolution = 0.4 is moderate, broad clusters
+#4,575 nodes (representing individual cells)
+# 152,541 edges (representing connections between similar cells)
+
+```
+
+
+
+```{r}
+filtered_seu_norm <- RunUMAP(filtered_seu_norm, dims = 1:15)
+```
+
+```{r, dev='cairo_pdf'}
+DimPlot(filtered_seu_norm, reduction = 'umap')
+
+```
