@@ -30,19 +30,19 @@ Single-cell RNA sequencing study focused on understanding the differences betwee
 
 **Cancer Cell Lines (IDC and ILC):**
 
--    MCF7 – Wild type (IDC)
+-    MCF7 – Wild type 
 
--   MCF7 with ESR1 Y537S mutation (IDC)
+-   MCF7 with ESR1 Y537S mutation 
 
--   T47D – Wild type (IDC)
+-   T47D – Wild type 
 
--   T47D with CDH1 knockout (CRISPR) (IDC)
+-   T47D with CDH1 knockout (CRISPR) 
 
--   MDA-MB-134-VI (IDC)
+-   MDA-MB-134-VI 
 
--   SUM44-PE (IDC)
+-   SUM44-PE 
 
--   BCK4 (IDC)
+-   BCK4 
 
 **Control Cell Line:**
 
@@ -64,3 +64,21 @@ Chen F, Ding K, Priedigkeit N, et al.
 Single-Cell Transcriptomic Heterogeneity in Invasive Ductal and Lobular
 Breast Cancer Cells [published correction appears in Cancer Res. 2024
 Dec 16;84(24):4298. doi: 10.1158/0008-5472.CAN-24-3940.]. *Cancer Res*. 2021;81(2):268-281. doi:10.1158/0008-5472.CAN-20-0696
+
+I'll create a version with hyperlinked citations for your README:
+
+## Research Approach
+The analysis will employ four key cell populations:
+- MCF7 (wild type) - Standard IDC reference line
+- MCF7 with ESR1 Y537S mutation - Model for endocrine resistance
+- T47D (wild type) - Secondary IDC reference line
+- T47D with CDH1 knockout - Model for adhesion disruption
+
+
+This combination allows the study of how critical mutations affect cellular communication networks in IDC. [ESR1 mutations are implicated in endocrine therapy resistance and metastasis](https://doi.org/10.1186/s13058-017-0851-4), while [E-cadherin loss significantly alters cell adhesion and invasion properties](https://doi.org/10.1158/2159-8290.CD-17-0603). 
+
+Recent studies indicate [these mutations fundamentally reshape how cancer cells interact with their environment](https://doi.org/10.1038/s41598-018-33525-5), potentially driving disease progression and treatment resistance.
+
+By comparing these carefully selected cell lines using CellChat analysis, we aim to identify altered signaling pathways that could reveal new therapeutic targets specific to molecular subtypes of IDC breast cancer.
+
+
