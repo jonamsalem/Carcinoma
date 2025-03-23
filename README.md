@@ -65,8 +65,6 @@ Single-Cell Transcriptomic Heterogeneity in Invasive Ductal and Lobular
 Breast Cancer Cells [published correction appears in Cancer Res. 2024
 Dec 16;84(24):4298. doi: 10.1158/0008-5472.CAN-24-3940.]. *Cancer Res*. 2021;81(2):268-281. doi:10.1158/0008-5472.CAN-20-0696
 
-I'll create a version with hyperlinked citations for your README:
-
 ## Research Approach
 The analysis will employ four key cell populations:
 - MCF7 (wild type) - Standard IDC reference line
