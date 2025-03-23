@@ -1,4 +1,4 @@
-# Single-Cell Insights into Carcinoma and Breast Cancer
+# Decoding Cell-Cell Communication Patterns in IDC: Effects of ESR1 and CDH1 Mutations
 
 ## Introduction
 
@@ -14,11 +14,11 @@ While the exact cause of IDC isn't always clear, [several factors](https://pmc.n
 
 ### Applications of Single-Cell RNA-Seq in Invasive Ductral Carinoma
 
--   Like other cancers, Carinoma is not made up of identical cancer cells. Instead, the tumor is composed of a **diverse population of cells.** Single Cell Sequencing allows researches to study cancer heterogeneity at finer resolutions when compared to bulk RNA-Seq, enabling scientists to identify h distinct gene expression profiles, which could indicate **aggressiveness or drug resistance** of subpopulations.
+-   Like other cancers, Carcinoma is not made up of identical cancer cells. Instead, the tumor is composed of a **diverse population of cells.** Single Cell Sequencing allows researches to study cancer heterogeneity at finer resolutions when compared to bulk RNA-Seq, enabling scientists to identify h distinct gene expression profiles, which could indicate **aggressiveness or drug resistance** of subpopulations.
 
 -   scRNA-Seq allows for the understanding of the tumor environment. Single-cell sequencing allows researchers to capture both cancer cells and surrounding stromal, immune, and endothelial cells in the tumor, revealing how these cells communicate.
 
--   As Carcinoma progresses, the tumor evolves over time, acquiring new mutations that can contribute to drug resistance or metastasis. Single-cell sequrncing techeologies enables the tracking of these **epigenetic changes** across individual cells, giving insights into the **evolutionary trajectory**
+-   As Carcinoma progresses, the tumor evolves over time, acquiring new mutations that can contribute to drug resistance or metastasis. Single-cell sequencing techeologies enables the tracking of these **epigenetic changes** across individual cells, giving insights into the **evolutionary trajectory**
 
 -   Single-cell RNA-Seq can reveal **subpopulations of cells** that are resistant to chemotherapy, radiation, or hormonal therapies which help identify which cells are actually **expressing resistance mechanisms** even if the majority of the tumor seems responsive to treatment, enabling clinicians to set **personalized treatment regimens** for patients.
 
